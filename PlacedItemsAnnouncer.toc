@@ -2,7 +2,7 @@
 ## Title: |cff00ff00Place Items Announcer|r
 ## Notes: Announces when consumable items are placed in group
 ## Author: |cffDA70D6LownIgnitus|r
-## Version: |cffFF4500v0.0.1|r
+## Version: |cffFF4500v0.0.4|r
 ## X-Date: 2021-04-12
 ## X-Website: https://github.com/lownignitus/
 ## SavedVariables: piaSettings

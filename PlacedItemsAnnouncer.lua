@@ -1,6 +1,6 @@
 -- Title: Placed Items Announcer
 -- Author: LownIgnitus
--- Version: 0.0.1
+-- Version: 0.0.4
 -- Desc: Announces when consumable items are placed in group
 
 CF = CreateFrame
