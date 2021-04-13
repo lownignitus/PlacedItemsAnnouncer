@@ -1,5 +1,5 @@
 ## Interface: 90005
-## Title: |cff00ff00Place Item Announcer|r
+## Title: |cff00ff00Place Items Announcer|r
 ## Notes: Announces when consumable items are placed in group
 ## Author: |cffDA70D6LownIgnitus|r
 ## Version: |cffFF4500v0.0.1|r
@@ -7,4 +7,4 @@
 ## X-Website: https://github.com/lownignitus/
 ## SavedVariables: piaSettings
 
-PlacedItemAnnouncer.lua
+PlacedItemsAnnouncer.lua
