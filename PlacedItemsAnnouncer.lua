@@ -95,6 +95,7 @@ piaEvents_table.eventFrame = CF("Frame");
 piaEvents_table.eventFrame:RegisterEvent("ADDON_LOADED");
 piaEvents_table.eventFrame:RegisterEvent("PLAYER_REGEN_DISABLED");
 piaEvents_table.eventFrame:RegisterEvent("PLAYER_REGEN_ENABLED");
+piaEvents_table.eventFrame:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED");
 piaEvents_table.eventFrame:SetScript("OnEvent", function(self, event, ...)
 	piaEvents_table.eventFrame[event](self, ...);
 end);
@@ -116,6 +117,7 @@ function piaEvents_table.eventFrame:ADDON_LOADED(AddOn)
 			["piaDebug2"] = false,
 			["piaDebug3"] = false,
 			["piaDebug4"] = false,
+			["piaDebug5"] = false,
 		}
 	}
 
@@ -142,25 +144,26 @@ function piaEvents_table.eventFrame:COMBAT_LOG_EVENT_UNFILTERED()
 	if piaSettings.options.piaActivate == true then
 		local _, subevent, _, _, sourceName, _, _, _, destinationName, _, _, spellID, spellName = CombatLogGetCurrentEventInfo()
 		local player = UnitName("player")
+		local inParty = UnitInParty(sourceName)
+
+		if piaSettings.options.piaDebug2 == true then
+			print(sourceName)
+			print(inParty)
+		end
 		
-		if sourceName == player and piaSettings.options.piaDebug2 == true then
+		if (sourceName == player and piaSettings.options.piaDebug3 == true) then
 			print(spellName)
 			print(spellID)
 			print(subevent)
-			print(sourceName)
 		end
-
-		local message = ""
-		local channel
-		local spellLink = GetSpellLink(spellID)
-		
-		if subevent == "SPELL_CAST_START" or subevent == "SPELL_SUMMON" or subevent == "SPELL_CREATE" then
+		--SPELL_CAST_START
+		if subevent == "SPELL_CAST_SUCCESS" or subevent == "SPELL_SUMMON" or subevent == "SPELL_CREATE" then
 			local inGroup = IsInGroup()
 			local inDungeon = IsInGroup(LE_PARTY_CATEGORY_INSTANCE)
 			local inRaid = IsInRaid()
 			local inLFR = IsInRaid(LE_PARTY_CATEGORY_INSTANCE)
 			
-			if piaSettings.options.piaDebug3 == true then
+			if piaSettings.options.piaDebug4 == true then
 				print("in sub events")
 				print("Group " .. tostring(inGroup))
 				print("Dungeon " .. tostring(inDungeon))
@@ -168,14 +171,19 @@ function piaEvents_table.eventFrame:COMBAT_LOG_EVENT_UNFILTERED()
 				print("LFR " .. tostring(inLFR))
 			end
 			
-			if inGroup then
-				if (feastIDs[spellID] or cauldrenIDs[spellID] or codexIDs[spellID] or miscIDs[spellID] and subevent ~= "SPELL_CREATE") then
+			if (inGroup == true and inParty == true) then
+				local message = ""
+				local channel
+				local spellLink = GetSpellLink(spellID)
+				if (miscIDs[spellID] or cauldrenIDs[spellID] or codexIDs[spellID] or feastIDs[spellID]) and subevent == "SPELL_CAST_SUCCESS" then
 					message = sourceName .. " just placed a " .. spellLink
-				elseif (summonIDs[spellID] or repairIDs[spellID] and subevent == "SPELL_CREATE") then
+				--[[elseif (miscIDs[spellID] and subevent == "SPELL_SUMMON") then
+					message = sourceName .. " just placed a " .. spellLink]]
+				elseif (summonIDs[spellID] or repairIDs[spellID]) and subevent == "SPELL_CREATE" then
 					message = sourceName .. " is casting " .. spellLink
 				end
 
-				if piaSettings.options.piaDebug4 == true then
+				if piaSettings.options.piaDebug5 == true then
 					print(message)
 				end
 				
@@ -195,7 +203,7 @@ end
 
 function piaEvents_table.eventFrame:PLAYER_REGEN_ENABLED()
 	if piaSettings.options.piaActivate == true then
-		if piaSettings.options.piaDebug2 == true then
+		if piaSettings.options.piaDebug1 == true then
 			print("out of combat")
 		end
 
@@ -205,7 +213,7 @@ end
 
 function piaEvents_table.eventFrame:PLAYER_REGEN_DISABLED()
 	if piaSettings.options.piaActivate == true then
-		if piaSettings.options.piaDebug2 == true then
+		if piaSettings.options.piaDebug1 == true then
 			print("in combat")
 		end
 
@@ -214,9 +222,9 @@ function piaEvents_table.eventFrame:PLAYER_REGEN_DISABLED()
 end
 
 function SlashCmdList.PLACEDITEMSANNOUNCER(msg, Editbox)
-	print(msg)
+	--print(msg)
 	local _, _, cmd, args = string.find(msg, "%s?(%w+)%s?(.*)")
-	print(cmd .. " " .. args)
+	--print(cmd .. " " .. args)
 	if cmd == "toggle" then
 		piaToggle()
 	elseif cmd == "debug" then
@@ -252,9 +260,17 @@ function piaDebug(args)
 	elseif args == "2" then
 		if piaSettings.options.piaDebug2 == false then
 			piaSettings.options.piaDebug2 = true
-			ChatFrame1:AddMessage("Placed Items Announcer |cff00ff00Debug Spell Name & Event Activated|r!")
+			ChatFrame1:AddMessage("Placed Items Announcer |cff00ff00Debug Party check Activated|r!")
 		elseif piaSettings.options.piaDebug2 == true then
 			piaSettings.options.piaDebug2 = false
+			ChatFrame1:AddMessage("Placed Items Announcer |cffff0000Debug party check Deactivated|r!")
+		end
+	elseif args == "3" then
+		if piaSettings.options.piaDebug3 == false then
+			piaSettings.options.piaDebug3 = true
+			ChatFrame1:AddMessage("Placed Items Announcer |cff00ff00Debug Spell Name & Event Activated|r!")
+		elseif piaSettings.options.piaDebug3 == true then
+			piaSettings.options.piaDebug3 = false
 			ChatFrame1:AddMessage("Placed Items Announcer |cffff0000Debug Spell Name & Event Deactivated|r!")
 		end
 	elseif args == "3" then
